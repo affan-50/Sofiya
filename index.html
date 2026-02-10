@@ -65,13 +65,14 @@
         @keyframes slowFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
         .profile-container { position: relative; width: 150px; margin: 0 auto 10px auto; }
-        .profile-img { width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--royal-violet); object-fit: cover; }
+        .profile-img { width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--royal-violet); object-fit: cover; box-shadow: 0 0 20px rgba(138, 43, 226, 0.3); }
 
         .ramadan-player {
             background: rgba(255, 255, 255, 0.07); border: 1px solid var(--royal-violet);
             padding: 12px 25px; border-radius: 50px; margin: 15px auto 25px auto;
             display: inline-flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.4s;
         }
+        .ramadan-player:hover { background: rgba(138, 43, 226, 0.2); transform: scale(1.05); }
 
         .quote-container {
             min-height: 100px; padding: 20px; margin: 20px 0; background: rgba(0, 0, 0, 0.2);
@@ -86,96 +87,176 @@
         .stat-value { font-size: 3.5rem; font-weight: 800; color: var(--neon-mint); display: block; }
         .stat-label { font-size: 0.8rem; letter-spacing: 3px; color: var(--royal-violet); text-transform: uppercase; }
 
-        .quran-container { background: rgba(0, 0, 0, 0.3); border-radius: 30px; padding: 20px; margin: 25px 0; }
+        .quran-container { background: rgba(0, 0, 0, 0.3); border-radius: 30px; padding: 20px; margin: 25px 0; border: 1px solid rgba(255, 255, 255, 0.05); }
         .quran-scroll { max-height: 180px; overflow-y: auto; padding-right: 8px; }
         .quran-scroll::-webkit-scrollbar { width: 4px; }
         .quran-scroll::-webkit-scrollbar-thumb { background: var(--royal-violet); border-radius: 10px; }
 
         .secret-section { padding: 20px; border-radius: 30px; background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); }
+        .pass-input { background:rgba(255,255,255,0.05); border: 1px solid var(--royal-violet); color:white; padding:10px; border-radius:15px; text-align:center; width: 80%; margin-bottom: 10px; }
+        .unlock-btn { background:var(--neon-mint); border:none; padding:12px; border-radius:15px; font-weight:bold; cursor:pointer; width: 80%; color: #1E1210; }
     </style>
 </head>
 <body onload="initApp()">
 
     <div id="stars-container"></div>
+    
     <audio id="ramadanMusic" loop><source src="ramadan.mp3" type="audio/mpeg"></audio>
+    <audio id="alertSound"><source src="notification_sound.mp3" type="audio/mpeg"></audio>
 
     <div class="main-wrapper">
         <div class="container">
             <div class="arabic-name">صُوفِيَا</div>
+
             <div><span class="flower-divider">✨</span></div>
-            <div class="profile-container"><img src="cat.jpg" alt="Sofiya" class="profile-img"></div>
+
+            <div class="profile-container">
+                <img src="cat.jpg" alt="Sofiya" class="profile-img">
+            </div>
+
             <div class="ramadan-player" onclick="toggleMusic()">
                 <i class="fas fa-play" style="color: var(--neon-mint);" id="playIcon"></i>
                 <span style="font-size: 0.85rem; font-weight: 600;">Maher Zain - Ramadan</span>
             </div>
-            <div class="quote-container"><div id="quran-quote">إِنَّ مَعَ الْعُسْرِ يُስራ</div></div>
+
+            <div class="quote-container">
+                <div id="quran-quote">إِنَّ مَعَ الْعُسْرِ يُسْرًا</div>
+            </div>
+
             <div class="stat-card">
                 <span id="days-count" class="stat-value">--</span>
                 <span id="stat-label" class="stat-label">Days Until Ramadan</span>
             </div>
+
             <div class="quran-container">
                 <div style="color: var(--neon-mint); font-weight: bold; margin-bottom: 15px;">📖 Sofiya's Khatm Plan</div>
-                <div class="quran-scroll"><table style="width: 100%; text-align: left; border-collapse: collapse;" id="qTable"></table></div>
+                <div class="quran-scroll">
+                    <table style="width: 100%; text-align: left; border-collapse: collapse;" id="qTable"></table>
+                </div>
             </div>
+
             <div class="secret-section">
-                <input type="password" id="passInput" style="background:rgba(255,255,255,0.05); border: 1px solid var(--royal-violet); color:white; padding:10px; border-radius:15px; text-align:center; width: 80%;" placeholder="Secret Key">
-                <button onclick="checkPass()" style="background:var(--neon-mint); border:none; padding:12px; border-radius:15px; font-weight:bold; cursor:pointer; margin-top:10px; width: 80%; color: #1E1210;">Unlock</button>
-                <div id="secret-content" style="display:none; margin-top:15px;">✨ "Sofiya, may your Ramadan be a journey of light and growth. 🌙." ✨</div>
+                <input type="password" id="passInput" class="pass-input" placeholder="Secret Key">
+                <button onclick="checkPass()" class="unlock-btn">Unlock</button>
+                <div id="secret-content" style="display:none; margin-top:15px;">
+                    ✨ "Sofiya, may your Ramadan be a journey of light and growth. 🌙." ✨
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- ማሳሰቢያ (Notification) Logic ---
+        const audio = document.getElementById("ramadanMusic");
+        const alertSound = document.getElementById("alertSound");
+        const icon = document.getElementById("playIcon");
+
+        // --- Start App and Request Permissions ---
         function initApp() {
             if ("Notification" in window) {
                 Notification.requestPermission();
             }
             updateRamadanStatus();
+            // Start checking for scheduled times every minute
+            setInterval(checkScheduledTimes, 60000);
         }
 
-        function sendHourlyNote() {
-            if (Notification.permission === "granted") {
-                new Notification("የሶፊያ ማስታወሻ 🌙", {
-                    body: "አሁን አዲስ ሰዓት ሆኗል! ዚክር ለማድረግ ወይም ቁርአን ለመቅራት ጥቂት ደቂቃ ይውሰዱ። ✨",
-                    icon: "cat.jpg"
-                });
+        // --- 3 Daily Notifications (8 AM, 2 PM, 8 PM) ---
+        let lastNotifiedHour = -1;
+        function checkScheduledTimes() {
+            const now = new Date();
+            const h = now.getHours();
+            const m = now.getMinutes();
+            const scheduledHours = [8, 14, 20]; // 24-hour format
+
+            if (scheduledHours.includes(h) && m === 0 && lastNotifiedHour !== h) {
+                if (Notification.permission === "granted") {
+                    new Notification("Sofiya's Sanctuary 🌙", {
+                        body: "Time for your reflection and Quran reading session! ✨",
+                        icon: "cat.jpg"
+                    });
+                    alertSound.play().catch(e => console.log("Sound play was blocked."));
+                }
+                lastNotifiedHour = h;
             }
         }
-        setInterval(sendHourlyNote, 3600000); // በየ 1 ሰዓቱ
 
-        // --- ሌሎች የቀድሞ ተግባራት ---
-        const audio = document.getElementById("ramadanMusic");
-        const icon = document.getElementById("playIcon");
+        // --- Music Controls ---
         function toggleMusic() {
-            if (audio.paused) { audio.play(); icon.className = "fas fa-pause"; } 
-            else { audio.pause(); icon.className = "fas fa-play"; }
+            if (audio.paused) {
+                audio.play();
+                icon.className = "fas fa-pause";
+            } else {
+                audio.pause();
+                icon.className = "fas fa-play";
+            }
         }
 
-        const quotes = ["إِنَّ مَعَ الْعُسْرِ يُسْرًا", "فَاذْكُرُونِي أَذْكُرْكُمْ", "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ", "وَقُل رَّبِّ زِدْنِي عِلْمًا", "ادْعُونِي أَسْتَجِبْ لَكُمْ"];
-        let quoteIndex = 0;
+        // --- Quran Quote Logic (10 Second Intervals) ---
+        const quotes = [
+            "إِنَّ مَعَ الْعُسْرِ يُسْرًا",
+            "فَاذْكُرُونِي أَذْକُرْكُمْ",
+            "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ",
+            "وَقُل رَّبِّ زِدْنِي عِلْمًا",
+            "ادْعُونِي أَسْتَجِبْ لَكُمْ",
+            "وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ"
+        ];
+        let qIdx = 0;
         setInterval(() => {
-            const quoteEl = document.getElementById('quran-quote');
-            quoteEl.style.opacity = 0;
+            const el = document.getElementById('quran-quote');
+            el.style.opacity = 0;
             setTimeout(() => {
-                quoteIndex = (quoteIndex + 1) % quotes.length;
-                quoteEl.innerText = quotes[quoteIndex];
-                quoteEl.style.opacity = 1;
+                qIdx = (qIdx + 1) % quotes.length;
+                el.innerText = quotes[qIdx];
+                el.style.opacity = 1;
             }, 1000);
         }, 10000);
 
+        // --- Ramadan Countdown ---
         function updateRamadanStatus() {
-            const ramadanStart = new Date("February 17, 2026 00:00:00").getTime();
-            const diff = ramadanStart - new Date().getTime();
-            document.getElementById("days-count").innerText = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+            const ramStart = new Date("February 17, 2026 00:00:00").getTime();
+            const diff = ramStart - new Date().getTime();
+            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+            document.getElementById("days-count").innerText = days > 0 ? days : "🌙";
+            if(days <= 0) document.getElementById("stat-label").innerText = "Ramadan Mubarak!";
         }
 
+        // --- Generate Sparkles ---
+        setInterval(() => {
+            const container = document.getElementById('stars-container');
+            const s = document.createElement('div');
+            s.className = 'sparkle';
+            s.style.left = Math.random() * 100 + 'vw';
+            s.style.top = '-2vh';
+            s.style.width = Math.random() * 3 + 1 + 'px';
+            s.style.animationDuration = Math.random() * 3 + 4 + 's';
+            container.appendChild(s);
+            setTimeout(() => s.remove(), 7000);
+        }, 400);
+
+        // --- Populate Khatm Table ---
         const table = document.getElementById('qTable');
         for (let i = 1; i <= 30; i++) {
-            table.innerHTML += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding:12px;">Day ${i}: Juz ${i}</td><td style="text-align:right;"><i class="far fa-circle" style="color:var(--royal-violet); cursor:pointer;" onclick="toggleIcon(this)"></i></td></tr>`;
+            table.innerHTML += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding:12px; font-size: 0.9rem;">Day ${i}: Juz ${i}</td>
+                <td style="text-align:right;">
+                    <i class="far fa-circle" style="color:var(--royal-violet); cursor:pointer;" onclick="toggleIcon(this)"></i>
+                </td>
+            </tr>`;
         }
-        function toggleIcon(i) { i.className = 'fas fa-check-circle'; i.style.color = '#00FFC3'; confetti(); }
-        function checkPass() { if(document.getElementById('passInput').value.toLowerCase()==='sofiya'){document.getElementById('secret-content').style.display='block';confetti();}}
+
+        function toggleIcon(i) {
+            i.className = 'fas fa-check-circle';
+            i.style.color = '#00FFC3';
+            confetti({ particleCount: 30, spread: 50, colors: ['#8A2BE2', '#00FFC3'] });
+        }
+
+        // --- Secret Section Password Check ---
+        function checkPass() {
+            if(document.getElementById('passInput').value.toLowerCase() === 'sofiya') {
+                document.getElementById('secret-content').style.display = 'block';
+                confetti({ particleCount: 150, spread: 70, colors: ['#8A2BE2', '#00FFC3'] });
+            }
+        }
     </script>
 </body>
 </html>
