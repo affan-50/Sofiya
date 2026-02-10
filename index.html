@@ -4,18 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sofiya's Sanctuary</title>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Montserrat:wght@300;500;700&family=Reem+Kufi:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     
     <style>
         :root {
-            /* Updated color palette for Sofiya: Royal Violet & Neon Mint */
             --royal-violet: #8A2BE2;
             --neon-mint: #00FFC3;
             --chocolate: #1E1210; 
-            --soft-lavender: #E6E6FA;
-            --deep-rose: #C71585;
             --soft-white: #fdfcfc;
         }
 
@@ -52,34 +49,37 @@
         }
 
         .arabic-name {
-            font-family: 'Amiri', serif; font-size: 5rem;
-            margin: 0; color: white; text-shadow: 0 0 30px var(--royal-violet);
-            line-height: 1.2; direction: rtl;
+            font-family: 'Reem Kufi', sans-serif;
+            font-size: 5.5rem;
+            margin: 0;
+            color: white;
+            line-height: 1.2;
+            direction: rtl;
+            text-shadow: 0 0 20px var(--royal-violet), 0 0 40px rgba(138, 43, 226, 0.4);
+            animation: nameGlow 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes nameGlow {
+            from { transform: scale(1); filter: brightness(1); }
+            to { transform: scale(1.02); filter: brightness(1.2); }
         }
 
         .flower-divider {
             font-size: 2.8rem;
-            margin: 20px 0;
+            margin: 15px 0;
             display: inline-block;
-            filter: drop-shadow(0 0 15px var(--soft-lavender));
-            animation: slowFloat 6s ease-in-out infinite, slowRotate 15s linear infinite;
+            animation: slowFloat 6s ease-in-out infinite;
         }
 
         @keyframes slowFloat {
-            0%, 100% { transform: translateY(0) scale(1); opacity: 0.9; }
-            50% { transform: translateY(-15px) scale(1.15); opacity: 1; }
-        }
-
-        @keyframes slowRotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         .profile-container { position: relative; width: 150px; margin: 0 auto 10px auto; }
         .profile-img {
             width: 140px; height: 140px; border-radius: 50%;
             border: 4px solid var(--royal-violet); object-fit: cover;
-            box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
         }
 
         .ramadan-player {
@@ -93,21 +93,25 @@
             gap: 15px;
             cursor: pointer;
             transition: 0.4s;
-            box-shadow: 0 0 15px rgba(138, 43, 226, 0.2);
         }
-        .ramadan-player:hover { background: rgba(138, 43, 226, 0.15); transform: scale(1.05); }
-        .play-btn-icon { color: var(--neon-mint); font-size: 1.3rem; }
-        .player-text { font-size: 0.85rem; font-weight: 600; color: white; letter-spacing: 0.5px; }
+        .ramadan-player:hover { background: rgba(138, 43, 226, 0.2); }
 
-        .promise-verse {
-            margin: 20px 0; padding: 25px;
-            background: rgba(255, 255, 255, 0.03); border-radius: 30px;
+        .quote-container {
+            min-height: 100px;
+            padding: 20px;
+            margin: 20px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
             border-bottom: 2px solid var(--neon-mint);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .ayah-text {
-            font-family: 'Amiri', serif; font-size: 2.2rem; font-weight: bold;
-            background: linear-gradient(to right, var(--royal-violet), var(--neon-mint));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        #quran-quote {
+            font-family: 'Amiri', serif;
+            font-size: 1.5rem;
+            transition: opacity 1s ease-in-out;
+            color: var(--soft-white);
         }
 
         .stat-card {
@@ -115,23 +119,16 @@
             padding: 25px; border-radius: 35px; border: 1px solid rgba(0, 255, 195, 0.2);
             margin: 25px 0;
         }
-        .stat-value { font-size: 3.5rem; font-weight: 800; color: var(--neon-mint); display: block; line-height: 1; }
+        .stat-value { font-size: 3.5rem; font-weight: 800; color: var(--neon-mint); display: block; }
         .stat-label { font-size: 0.8rem; letter-spacing: 3px; color: var(--royal-violet); text-transform: uppercase; }
 
         .quran-container {
             background: rgba(0, 0, 0, 0.3); border-radius: 30px;
-            padding: 20px; margin: 25px 0; border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px; margin: 25px 0;
         }
         .quran-scroll { max-height: 180px; overflow-y: auto; padding-right: 8px; }
         .quran-scroll::-webkit-scrollbar { width: 4px; }
         .quran-scroll::-webkit-scrollbar-thumb { background: var(--royal-violet); border-radius: 10px; }
-
-        .btn-tg {
-            width: 100%; padding: 15px; border-radius: 20px; background: var(--royal-violet);
-            color: white; font-weight: bold; text-decoration: none; display: block; margin-bottom: 20px;
-            box-sizing: border-box; transition: 0.3s;
-        }
-        .btn-tg:hover { background: #7b27cc; box-shadow: 0 0 15px var(--royal-violet); }
 
         .secret-section { padding: 20px; border-radius: 30px; background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); }
     </style>
@@ -154,13 +151,13 @@
                 <img src="cat.jpg" alt="Sofiya" class="profile-img">
             </div>
 
-            <div class="ramadan-player" onclick="toggleMusic()" id="playerUI">
-                <i class="fas fa-play play-btn-icon" id="playIcon"></i>
-                <span class="player-text">Maher Zain - Ramadan</span>
+            <div class="ramadan-player" onclick="toggleMusic()">
+                <i class="fas fa-play" style="color: var(--neon-mint);" id="playIcon"></i>
+                <span style="font-size: 0.85rem; font-weight: 600;">Maher Zain - Ramadan</span>
             </div>
 
-            <div class="promise-verse">
-                <div class="ayah-text">وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ</div>
+            <div class="quote-container">
+                <div id="quran-quote">إِنَّ مَعَ الْعُسْرِ يُسْرًا</div>
             </div>
 
             <div class="stat-card">
@@ -174,10 +171,6 @@
                     <table style="width: 100%; text-align: left; border-collapse: collapse;" id="qTable"></table>
                 </div>
             </div>
-
-            <a href="https://t.me/strong3505" target="_blank" class="btn-tg">
-                <i class="fab fa-telegram-plane"></i> Message Sofiya
-            </a>
 
             <div class="secret-section">
                 <input type="password" id="passInput" style="background:rgba(255,255,255,0.05); border: 1px solid var(--royal-violet); color:white; padding:10px; border-radius:15px; text-align:center; width: 80%;" placeholder="Secret Key">
@@ -196,24 +189,44 @@
         function toggleMusic() {
             if (audio.paused) {
                 audio.play();
-                icon.className = "fas fa-pause play-btn-icon";
+                icon.className = "fas fa-pause";
             } else {
                 audio.pause();
-                icon.className = "fas fa-play play-btn-icon";
+                icon.className = "fas fa-play";
             }
         }
+
+        const quotes = [
+            "إِنَّ مَعَ الْعُسْرِ يُسْرًا",
+            "فَاذْكُرُونِي أَذْكُرْكُمْ",
+            "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ",
+            "وَقُل رَّبِّ زِدْنِي عِلْمًا",
+            "ادْعُونِي أَسْتَجِبْ لَكُمْ",
+            "وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
+            "إِنَّ رَبِّي قَرِيبٌ مُّجِيبٌ"
+        ];
+        let quoteIndex = 0;
+        function updateQuote() {
+            const quoteEl = document.getElementById('quran-quote');
+            quoteEl.style.opacity = 0;
+            setTimeout(() => {
+                quoteIndex = (quoteIndex + 1) % quotes.length;
+                quoteEl.innerText = quotes[quoteIndex];
+                quoteEl.style.opacity = 1;
+            }, 1000);
+        }
+        // Updated to 10 seconds (10000ms)
+        setInterval(updateQuote, 10000);
 
         function updateRamadanStatus() {
             const ramadanStart = new Date("February 17, 2026 00:00:00").getTime();
             const now = new Date().getTime();
             const diff = ramadanStart - now;
-            
             const display = document.getElementById("days-count");
             const label = document.getElementById("stat-label");
 
             if (diff > 0) {
-                let daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                display.innerText = daysLeft;
+                display.innerText = Math.ceil(diff / (1000 * 60 * 60 * 24));
                 label.innerText = "Days Until Ramadan";
             } else {
                 let dayOfRamadan = Math.floor(Math.abs(diff) / (1000 * 60 * 60 * 24)) + 1;
